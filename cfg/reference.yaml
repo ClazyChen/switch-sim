@@ -1,0 +1,183 @@
+pipeline: # for RMT pipeline, both hardware and software
+  axis_width: 512
+  macpu_count: 4
+  # hardware parameters, not program
+  field_type_count: 3 # 8, 16, 32
+  phv:
+    field8_count: 64
+    field16_count: 96
+    field32_count: 64
+  ring:
+    delay: 2
+  memory:
+    sram:
+      # it must be guaranteed that sram's count <= 2 ^ getaddress.sram_id_width
+      count: 80
+      addr_width: 10
+      data_width: 128
+      ctrl_write_count: 1
+  parser:
+    header_width: 4096
+    state_id_width: 8
+    concat_id_width: 6
+    # parser will store the packet_id as standard metadata in phv
+    #        we use one of the 16-bit containers to store it
+    # deparser use the same container to find the payload in sram
+    packet_id_width: 16
+    packet_id_container: 0
+    # sram to store the result of parser
+    sram_addr_width: 8
+  payload:
+    sram_addr_width: 12
+    payload_fifo_depth: 64
+  macpu:
+    enable: true
+    width: 32
+    # the number of cores if an mau is reconfigured as a cpu
+    count: 8
+    core_id_width: 8
+  mat:
+    getkey:
+      key_names: ["lut", "gtw"]
+      key_lut:
+        field8_count: 32
+        field16_count: 16
+        field32_count: 16
+      key_gtw:
+        field8_count: 16
+        field16_count: 8
+        field32_count: 8
+      any_connect: false
+    gateway:
+      gateway8_count: 8
+      gateway16_count: 4
+      gateway32_count: 4
+      all_count: '${gateway8_count} + ${gateway16_count} + ${gateway32_count}'
+      # list the operations supported by the gateway
+      ops: ["eq", "ne", "lt", "gt", "le", "ge"]
+      any_connect: false
+      translate:
+        addr_width: 8
+        data_width: 16
+      width: '${translate.data_width}'
+    hash:
+      count: 4
+      # hash function is fixed or programmable
+      # because programmable hash needs so many resources
+      # a fixed/programmable switch for hash units only is provided
+      # 1. all the modules are preprogrammed: 
+      #    set programmed.enable = true
+      #        fixed is not used
+      # 2. all the hash units are fixed, while other modules are programmable:
+      #    set programmed.enable = false
+      #    set fixed = [true, true, true, true]
+      # 3. some of the hash units are fixed
+      #    set programmed.enable = false
+      #    set fixed = [true, true, false, false]
+      # 4. all the hash units are programmable
+      #    set programmed.enable = false
+      #    set fixed = [false, false, false, false]
+      fixed: [false, false, false, false]
+      unit_size: 128
+      merge_levels: [128, 8]
+      # references:
+      # (128, [128, 8]): 2 cycles, method in RAPID
+      # (1024, [32, 32]): 2 cycles, method in RAPID fat-ver
+      # (128, [4, 16, 16]): 3 cycles
+      value:
+        # value_width = chip_select_width
+        #             + kv_pair_count
+        #             * kv_addr_width
+        #             *(kv_shared ? 1 : 2)
+        chip_select_width: 12
+        kv_shared: true
+        kv_pair_count: 2
+        kv_addr_width: '${pipeline.memory.sram.addr_width}'
+        width: '${chip_select_width} + ${kv_pair_count} * ${kv_addr_width} * (${kv_shared} ? 1 : 2)'
+    getaddress:
+      # we assume every key/value <= data width of a sram
+      # complex key/value can be split into multiple srams
+      #         no support for reconstructing the key/value
+      read_count: '${pipeline.mat.hash.count} * ${pipeline.mat.hash.value.kv_pair_count} * (${pipeline.mat.hash.value.kv_shared} ? 2 : 1)'
+      chip_select:
+        # we have {count} chip-select units
+        #    each of which process {group} requests
+        count: 4
+        group: '${read_count} / ${count}'
+        addr_width: 5
+        data_width: 7
+        total_width: '$(1 << ${addr_width}) * ${data_width}'
+      bit_pool:
+        explicit_zero: true
+        explicit_one: true
+        size: '${pipeline.mat.hash.count} * ${pipeline.mat.hash.value.chip_select_width} + (${explicit_zero} ? 1 : 0) + (${explicit_one} ? 1 : 0)'
+        output_width: '${read_count} * ${chip_select.addr_width}'
+      sram_id_width: '${chip_select.data_width}' 
+      on_chip_addr_width: '${pipeline.memory.sram.addr_width}'
+      # whether the hash values can be written to phv (for further use)
+      # its count must be equal to hash.count
+      # if set to false, the hash values are only used for address calculation
+      write_to_phv: [true, true, true, true]
+      write_to_phv_width: 32
+    memread:
+      level_count: 2
+      table_count: '${pipeline.mat.getaddress.chip_select.count}'
+      sram_data_width: '${pipeline.memory.sram.data_width}'
+    compare:
+      # there are # k-v pairs, each of table has multiple k-v pairs (to support cuckoo hash)
+      kv_pair_count: '${pipeline.mat.hash.value.kv_pair_count} * ${pipeline.mat.hash.count}'
+      key_part_start: [0, 128, 256, 384, 512, 640, 768, 896]
+      key_id_in_reads: [0, 2, 4, 6, 8, 10, 12, 14]
+      mask_unit: 8
+      mask_width: '${pipeline.memory.sram.data_width} / ${mask_unit}'
+    transform:
+      # output up to value_count values to the action unit
+      # each value corresponds to some of k-v pairs in the compare unit
+      value_count: 4
+      value_width: '${pipeline.memory.sram.data_width}'
+      value_parrallel: [2, 2, 2, 2]
+  act:
+    insfetch:
+      value:
+        # the value = [arg2 | arg1 | arg0 | action_id]
+        action_id_width: 32
+        argument_width: 32
+        argument_count: '$(${pipeline.mat.transform.value_width} - ${action_id_width}) / ${argument_width}'
+      vliw_count: '${pipeline.mat.transform.value_count}'
+      vliw_width: 512
+      sram:
+        addr_width: 10
+        data_width: '$(${pipeline.macpu.enable} ? ${pipeline.macpu.width} : ${pipeline.act.insfetch.vliw_width})'
+        count: '${pipeline.act.insfetch.vliw_width} / ${data_width}'
+      argument_count: '${pipeline.act.insfetch.value.argument_count} * ${vliw_count}'
+      primitive_width: 64
+      primitive_count_per_vliw: '${vliw_width} / ${primitive_width}'
+      primitive_count: '${vliw_count} * ${primitive_count_per_vliw}'
+      cpu_count_per_vliw: '${pipeline.macpu.count} / ${pipeline.mat.transform.value_count}'
+    distribute:
+      direct_connect: false
+      location_width: 6
+      distributed_width: '${pipeline.act.insfetch.primitive_width} - ${location_width}'
+      independent_stage: true
+    executer:
+      pipeline_level: 3
+      rd_width: 8 # defined in Primitive.scala
+      alu:
+        alu8_count: 8
+        alu16_count: 8
+        alu32_count: 8
+        all_count: '${alu8_count} + ${alu16_count} + ${alu32_count}'
+      salu:
+        alu8s_count: 0
+        alu16s_count: 0
+        alu32s_count: 8
+        all_count: '${alu8s_count} + ${alu16s_count} + ${alu32s_count}'
+      parallel_size: '${alu.all_count} + ${salu.all_count}'
+  programmed:
+    enable: false # use Program.scala as input
+  debug:
+    enable: true
+    # in debug mode (software simulation)
+    # the given PHVs are defined in sw/template/phv_test_example.txt
+    phv_test:
+      line_limit: 1024
