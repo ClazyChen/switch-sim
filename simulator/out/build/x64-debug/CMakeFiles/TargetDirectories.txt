@@ -1,3 +1,0 @@
-D:/Workspace/switch-sim/simulator/out/build/x64-debug/CMakeFiles/simulator.dir
-D:/Workspace/switch-sim/simulator/out/build/x64-debug/CMakeFiles/edit_cache.dir
-D:/Workspace/switch-sim/simulator/out/build/x64-debug/CMakeFiles/rebuild_cache.dir
