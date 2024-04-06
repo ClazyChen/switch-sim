@@ -1,6 +1,6 @@
-﻿#include "basic/BasicSystem.hpp"
-#include "basic/BasicAnalyzer.hpp"
-#include "basic/BasicGenerator.hpp"
+﻿#include "case/basic/BasicSystem.hpp"
+#include "case/basic/BasicAnalyzer.hpp"
+#include "case/basic/BasicGenerator.hpp"
 #include "test/TestApplication.hpp"
 
 #include <iostream>

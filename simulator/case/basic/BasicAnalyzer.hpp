@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../utils.hpp"
-#include "../p4/Phv.hpp"
+#include "../../utils.hpp"
+#include "../../p4/Phv.hpp"
 
 namespace fpga::basic {
 

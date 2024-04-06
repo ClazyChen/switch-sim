@@ -2,8 +2,8 @@
 
 #include "BasicAnalyzer.hpp"
 #include "BasicGenerator.hpp"
-#include "../p4/Pipeline.hpp"
-#include "../test/TestInstance.hpp"
+#include "../../p4/Pipeline.hpp"
+#include "../../test/TestInstance.hpp"
 
 namespace fpga::basic {
 
