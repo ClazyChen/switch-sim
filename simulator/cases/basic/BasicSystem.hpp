@@ -5,7 +5,7 @@
 #include "../../p4/Pipeline.hpp"
 #include "../../test/TestInstance.hpp"
 
-namespace fpga::basic {
+namespace fpga::cases::basic {
 
     // 用于进行可编程流水线基本功能的测试
     template <

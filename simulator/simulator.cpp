@@ -1,6 +1,6 @@
-﻿#include "case/basic/BasicSystem.hpp"
-#include "case/basic/BasicAnalyzer.hpp"
-#include "case/basic/BasicGenerator.hpp"
+﻿#include "cases/basic/BasicSystem.hpp"
+#include "cases/basic/BasicAnalyzer.hpp"
+#include "cases/basic/BasicGenerator.hpp"
 #include "test/TestApplication.hpp"
 
 #include <iostream>
@@ -14,11 +14,11 @@ static constexpr fpga::utils::FieldBundleProfile test_phv = {
 };
 
 fpga::test::TestApplication<
-	fpga::basic::BasicSystem<
+	fpga::cases::basic::BasicSystem<
 		fpga::utils::Input<
 			fpga::p4::Phv,
-			fpga::basic::BasicGenerator<test_phv>,
-			fpga::basic::BasicAnalyzer<test_phv>
+			fpga::cases::basic::BasicGenerator<test_phv>,
+			fpga::cases::basic::BasicAnalyzer<test_phv>
 		>,
 		fpga::utils::Output<fpga::p4::Phv>,
 		/* MAU_COUNT = */ 1

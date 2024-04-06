@@ -3,7 +3,7 @@
 #include "../../utils.hpp"
 #include "../../p4/Phv.hpp"
 
-namespace fpga::basic {
+namespace fpga::cases::basic {
 
     // 用于进行可编程流水线基本功能的测试
     template<decltype(auto) profile>
