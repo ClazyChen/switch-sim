@@ -1,30 +1,29 @@
 #pragma once
 
 #include "../../../utils.hpp"
-#include "../../Pipeline.hpp"
+#include "../../Pipe.hpp"
 #include "GetKeyConfig.hpp"
 
 namespace fpga::p4::mat::getkey {
 	template <size_t mau_id>
 	struct Getkey : public Module {
 		struct IO {
-			fpga::p4::Pipeline pipe;
-			Out<fpga::p4::LookupKey> lookup_key_out;
-			Out<fpga::p4::GatewayKey> gateway_key_out;
+			Pipe pipe;
+			Out<LookupKey> lookup_key_out;
+			Out<GatewayKey> gateway_key_out;
 		} io;
 
-		void reset() {
+		void reset() override {
 			io.pipe.reset();
 			io.gateway_key_out = nullptr;
 			io.lookup_key_out = nullptr;
 		}
 
-		void update() {
-			io.pipe.pass();
+		void update() override {
 		}
 
-		void run() {
-			if (io.packet_in) {
+		void run() override {
+			if (io.pipe.phv_in) {
 				load_key<GetKeyConfig<mau_id>::Lookup>(io.lookup_key_out.get());
 				load_key<GetKeyConfig<mau_id>::Gateway>(io.gateway_key_out.get());
             }
@@ -32,9 +31,10 @@ namespace fpga::p4::mat::getkey {
                 io.lookup_key_out = nullptr;
                 io.gateway_key_out = nullptr;
 			}
+			io.pipe.pass();
 		}
 
-		<typename Cfg, typename Key>
+		template <typename Cfg, typename Key>
 		void load_key(Key& key) {
 			load_field<8>(key.field8, Cfg::field8);
 			load_field<16>(key.field16, Cfg::field16);

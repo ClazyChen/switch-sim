@@ -1,40 +1,70 @@
 #pragma once
 
-#include "../utils.hpp"
-#include "Phv.hpp"
+#include "Mau.hpp"
 
 namespace fpga::p4 {
 
-    // 用于流水线的模拟
+    // 用于实现整条流水线的控制
+    // N: 流水线阶段数
+    template <size_t N>
     struct Pipeline {
-        In<Phv> phv_in;
-        Out<Phv> phv_out;
+        struct IO {
+            Pipe pipe;
+        } io;
 
-        Pipeline() = default;
+        // 实现 N 个流水线阶段
+        std::array<std::unique_ptr<Module>, N> stages;
 
-        // 重置输出
-        void reset() {
-            phv_out = nullptr;
+    private:
+        // 初始化每个流水线阶段为 Mau<I>
+        template <size_t I> requires (I >= 0 && I < N)
+        void init() {
+            stages[I] = std::make_unique<Mau<I>>();
+            if constexpr (I < N - 1) {
+                init<I + 1>();
+            }
         }
 
-        // 用于将 in 通过一级锁存传递到 out
-        void pass() {
-            phv_out = phv_in;
+    public:
+        Pipeline() {
+            init<0>();
         }
 
-        // 用于将外部流水线的 in 传递到内部流水线接口的 in
-        void input_to(Pipeline& other) {
-            other.phv_in = phv_in;
+        void reset() override {
+            io.pipe.reset();
+            for (auto& stage : stages) {
+                stage->reset();
+            }
         }
 
-        // 用于将内部流水线的 out 传递到外部流水线接口的 out
-        void output_to(Pipeline& other) {
-            phv_out = other.phv_out;
+        void update() override {
+            // 传入每一级流水线的 input
+            io.pipe.input_to(stages[0]->io.pipe);
+            
+            // 需要注意的是 update 只用于更新每一级的 input 并完成其内部组合逻辑
+            // 但不会将 output 传递到下一级，所以先传入 input 再 update
+            for (size_t i = 0; i < N - 1; i++) {
+                stages[i]->io.pipe.output_to(stages[i + 1]->io.pipe);
+            }
+
+            // 运行每一级流水线的 update
+            for (auto& stage : stages) {
+                stage->update();
+            }
+
         }
 
-        // 用于将同级流水线的 out 传递到同级流水线接口的 in
-        void transport_to(Pipeline& other) {
-            other.phv_in = phv_out;
+        void run() override {
+            // 运行每一级流水线的 run
+            for (auto& stage : stages) {
+                stage->run();
+            }
+
+            // 传出最后一级流水线的 output
+            stages[N - 1]->io.pipe.output_to(io.pipe);
         }
+        
+
     };
+
 }

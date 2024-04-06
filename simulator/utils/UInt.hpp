@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <format>
 
 namespace fpga::utils {
 
@@ -313,5 +314,128 @@ namespace fpga::utils {
 
 
     };
+
+}
+
+template <size_t w>
+struct std::formatter<fpga::utils::UInt<w>> {
+
+    // 支持的格式化选项：
+    // - 'Bb'：二进制（大写表示包含b前缀）
+    // - 'Oo'：八进制
+    // - 'Hh'：十六进制
+    // - 'Dd'：十进制（仅对不大于64位的整数有效）
+    // - 'w'：显示位宽
+    // - '0'：显示前导零（仅对二进制有效）
+
+    char format_type = 'x';
+    bool display_format = false;
+    bool display_width = false;
+    bool display_zero = false;
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        auto it = ctx.begin(), end = ctx.end();
+
+        while (it != end) {
+            if (*it == 'B' || *it == 'b' || *it == 'O' || *it == 'o' || *it == 'H' || *it == 'h' || *it == 'D' || *it == 'd') {
+                display_format = std::isupper(*it);
+                format_type = std::tolower(*it);
+            } else if (*it == 'w') {
+                display_width = true;
+            } else if (*it == '0') {
+                display_zero = true;
+            } else if (*it == '}') {
+                break;
+            }
+            it++;
+        }
+        return it;
+    }
+
+private:
+
+    static constexpr void remove_leading_zeros(std::string& str) {
+        str = str.substr(str.find_first_not_of('0'));
+        if (str.empty()) {
+            str = "0";
+        }
+    }
+
+public:
+    template <typename FormatContext>
+    auto format(const fpga::utils::UInt<w>& value, FormatContext& ctx) const {
+        std::string result;
+        if (display_width) {
+            result += std::format("{}\'", w);
+        }
+        if (display_format) {
+            result += format_type;
+        }
+        if (format_type == 'd') {
+            if constexpr (w <= 64) {
+                // 可以被正常输出为十进制数
+                result += std::format("{}", value.data[0]);
+            } else {
+                // 位宽过大，无法输出
+                result += "<too large>";
+            }
+        }
+        else {
+            if (format_type == 'b') {
+                // 二进制
+                std::string binary;
+                binary.resize(w);
+                for (size_t i = 0; i < w; i++) {
+                    binary[w - i - 1] = '0' + value(i);
+                }
+                if (!display_zero) {
+                    // 不显示前导 0
+                    remove_leading_zeros(binary);
+                }
+                result += binary;
+            }
+            else if (format_type == 'o') {
+                // 八进制
+                std::string octal;
+                octal.resize((w + 2) / 3);
+                for (size_t i = 0; i < (w + 2) / 3; i++) {
+                    uint64_t temp = 0;
+                    for (size_t j = 0; j < 3 && i * 3 + j < w; j++) {
+                        temp |= value(i * 3 + j) << j;
+                    }
+                    octal[(w + 2) / 3 - i - 1] = '0' + temp;
+                }
+                remove_leading_zeros(octal);
+                result += octal;
+            } else if (format_type == 'h') {
+                // 十六进制
+                std::string hex;
+                hex.resize((w + 3) / 4);
+                for (size_t i = 0; i < (w + 3) / 4; i++) {
+                    uint64_t temp = 0;
+                    for (size_t j = 0; j < 4 && i * 4 + j < w; j++) {
+                        temp |= value(i * 4 + j) << j;
+                    }
+                    if (temp < 10) {
+                        hex[(w + 3) / 4 - i - 1] = '0' + temp;
+                    } else {
+                        hex[(w + 3) / 4 - i - 1] = 'a' + temp - 10;
+                    }
+                }
+                remove_leading_zeros(hex);
+                result += hex;
+            }
+        }
+
+    }
+
+};
+
+namespace fpga::utils {
+
+    template <size_t w>
+    std::ostream& operator<<(std::ostream& os, const UInt<w>& value) {
+        return os << std::format("{:w}", value);
+    }
 
 }
