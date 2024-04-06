@@ -36,15 +36,14 @@ namespace fpga::p4::mat::getkey {
 
 		template <typename Cfg, typename Key>
 		void load_key(Key& key) {
-			load_field<8>(key.field8, Cfg::field8);
-			load_field<16>(key.field16, Cfg::field16);
-			load_field<32>(key.field32, Cfg::field32);
+			load_field<8>(key.field8, Cfg::index8);
+			load_field<16>(key.field16, Cfg::index16);
+			load_field<32>(key.field32, Cfg::index32);
 		}
 
 		template <size_t width, typename A, typename Idx>
 		void load_field(A& arr, Idx idx) {
-			constexpr size_t count = arr.size();
-			for (size_t i = 0; i < count; i++) {
+			for (size_t i = 0; i < arr.size(); i++) {
 				arr[i] = get_container<width>(idx(i));
 			}
 		}

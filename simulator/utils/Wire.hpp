@@ -149,10 +149,7 @@ namespace fpga::utils {
 
         // 转换到 R（如果为空会强制初始化）
         constexpr const T& get() const {
-            if (ptr == nullptr) {
-                ptr = std::make_shared<T>();
-            }
-            return *ptr;
+            return const_cast<Signal*>(this)->get();
         }
 
         constexpr std::shared_ptr<T> get_shared_ptr() const {

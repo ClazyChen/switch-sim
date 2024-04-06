@@ -7,7 +7,7 @@ namespace fpga::p4 {
     // 用于实现整条流水线的控制
     // N: 流水线阶段数
     template <size_t N>
-    struct Pipeline {
+    struct Pipeline : public Module {
         struct IO {
             Pipe pipe;
         } io;
@@ -16,10 +16,16 @@ namespace fpga::p4 {
         std::array<std::unique_ptr<Module>, N> stages;
 
     private:
+
+        // 每个流水线阶段的输入输出端口
+        std::array<Pipe*, N> pipes;
+
         // 初始化每个流水线阶段为 Mau<I>
         template <size_t I> requires (I >= 0 && I < N)
         void init() {
-            stages[I] = std::make_unique<Mau<I>>();
+            auto mau = std::make_unique<Mau<I>>();
+            pipes[I] = &mau->io.pipe;
+            stages[I] = std::move(mau);
             if constexpr (I < N - 1) {
                 init<I + 1>();
             }
@@ -39,12 +45,12 @@ namespace fpga::p4 {
 
         void update() override {
             // 传入每一级流水线的 input
-            io.pipe.input_to(stages[0]->io.pipe);
+            io.pipe.input_to(*pipes[0]);
             
             // 需要注意的是 update 只用于更新每一级的 input 并完成其内部组合逻辑
             // 但不会将 output 传递到下一级，所以先传入 input 再 update
             for (size_t i = 0; i < N - 1; i++) {
-                stages[i]->io.pipe.output_to(stages[i + 1]->io.pipe);
+                pipes[i]->transport_to(*pipes[i + 1]);
             }
 
             // 运行每一级流水线的 update
@@ -61,7 +67,7 @@ namespace fpga::p4 {
             }
 
             // 传出最后一级流水线的 output
-            stages[N - 1]->io.pipe.output_to(io.pipe);
+            pipes[N - 1]->output_to(io.pipe);
         }
         
 

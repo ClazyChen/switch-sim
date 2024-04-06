@@ -9,6 +9,8 @@
 #include "utils/Random.hpp"
 #include "utils/Packet.hpp"
 #include "utils/Module.hpp"
+#include "utils/PacketGenerator.hpp"
+#include "utils/InputAnalyzer.hpp"
 
 #include "Config.hpp"
 #include "program/Program.hpp"

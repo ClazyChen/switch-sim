@@ -6,7 +6,7 @@ namespace fpga::p4 {
 
     // 用于实现一个完整的 MAU
     template <size_t mau_id>
-    struct Mau {
+    struct Mau : public Module {
         struct IO {
             Pipe pipe;
         } io;
