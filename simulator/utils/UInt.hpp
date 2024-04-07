@@ -30,6 +30,14 @@ namespace fpga::utils {
             return *this;
         }
 
+        constexpr UInt& clear() {
+            //内存初始化之后是默认值，需要赋值为全0
+            for (int i = 0; i < n; i++) {
+                data[i] &= 0x0;
+            }
+            return *this;
+        }
+
         // 用于存储大整数的数组
         // data[0] 存储最低位，data[n - 1] 存储最高位
         std::array<uint64_t, n> data;
@@ -54,7 +62,7 @@ namespace fpga::utils {
                 std::fill(data.begin() + UInt<u>::n, data.end(), 0);
             }
             else {
-                std::move(other.begin(), other.begin() + UInt<w>::n, data.begin());
+                std::move(other.data.begin(), other.data.begin() + UInt<w>::n, data.begin());
             }
         }
 
@@ -98,11 +106,11 @@ namespace fpga::utils {
         constexpr UInt<std::max(u, w)> operator|(const UInt<u>& other) const {
             UInt<std::max(u, w)> result;
             if constexpr (UInt<u>::n < UInt<w>::n) {
-                std::transform(other.data.begin(), other.data.end(), data.begin(), result.begin(), std::bit_or<uint64_t>());
+                std::transform(other.data.begin(), other.data.end(), data.begin(), result.data.begin(), std::bit_or<uint64_t>());
                 std::copy(data.begin() + UInt<u>::n, data.end(), result.data.begin() + UInt<u>::n);
             }
             else {
-                std::transform(data.begin(), data.end(), other.data.begin(), result.begin(), std::bit_or<uint64_t>());
+                std::transform(data.begin(), data.end(), other.data.begin(), result.data.begin(), std::bit_or<uint64_t>());
                 std::copy(other.data.begin() + UInt<w>::n, other.data.end(), result.data.begin() + UInt<w>::n);
             }
             return result;
@@ -112,19 +120,19 @@ namespace fpga::utils {
         constexpr UInt<std::max(u, w)> operator&(const UInt<u>& other) const {
             UInt<std::max(u, w)> result;
             // 因为 0 & 1 = 0，所以这里需要先转换成前缀 1 的形式
-            set_invalid_bits();
-            other.set_invalid_bits();
+            //set_invalid_bits();
+            //other.set_invalid_bits();
             if constexpr (UInt<u>::n < UInt<w>::n) {
-                std::transform(other.data.begin(), other.data.end(), data.begin(), result.begin(), std::bit_and<uint64_t>());
+                std::transform(other.data.begin(), other.data.end(), data.begin(), result.data.begin(), std::bit_and<uint64_t>());
                 std::fill(result.data.begin() + UInt<u>::n, result.data.end(), 0);
             }
             else {
-                std::transform(data.begin(), data.end(), other.data.begin(), result.begin(), std::bit_and<uint64_t>());
+                std::transform(data.begin(), data.end(), other.data.begin(), result.data.begin(), std::bit_and<uint64_t>());
                 std::fill(result.data.begin() + UInt<w>::n, result.data.end(), 0);
             }
             // 计算完成之后再将无效位清除
-            clear_invalid_bits();
-            other.clear_invalid_bits();
+            //clear_invalid_bits();
+            //other.clear_invalid_bits();
             return result;
         }
 
@@ -132,11 +140,11 @@ namespace fpga::utils {
         constexpr UInt<std::max(u, w)> operator^(const UInt<u>& other) const {
             UInt<std::max(u, w)> result;
             if constexpr (UInt<u>::n < UInt<w>::n) {
-                std::transform(other.data.begin(), other.data.end(), data.begin(), result.begin(), std::bit_xor<uint64_t>());
+                std::transform(other.data.begin(), other.data.end(), data.begin(), result.data.begin(), std::bit_xor<uint64_t>());
                 std::copy(data.begin() + UInt<u>::n, data.end(), result.data.begin() + UInt<u>::n);
             }
             else {
-                std::transform(data.begin(), data.end(), other.data.begin(), result.begin(), std::bit_xor<uint64_t>());
+                std::transform(data.begin(), data.end(), other.data.begin(), result.data.begin(), std::bit_xor<uint64_t>());
                 std::copy(other.data.begin() + UInt<w>::n, other.data.end(), result.data.begin() + UInt<w>::n);
             }
             return result;
@@ -151,6 +159,7 @@ namespace fpga::utils {
 
         constexpr UInt<w> operator<<(size_t u) const {
             UInt<w> result;
+            result.clear();
             size_t shift = u / 64;
             size_t offset = u % 64;
             for (size_t i = 0; i < n; i++) {
@@ -167,6 +176,7 @@ namespace fpga::utils {
 
         constexpr UInt<w> operator>>(size_t u) const {
             UInt<w> result;
+            result.clear();
             size_t shift = u / 64;
             size_t offset = u % 64;
             for (size_t i = 0; i < n; i++) {
