@@ -35,7 +35,9 @@ namespace fpga::utils {
         // data[0] 存储最低位，data[n - 1] 存储最高位
         std::array<uint64_t, n> data;
 
-        constexpr UInt() = default;
+        constexpr UInt() {
+            std::fill(data.begin(), data.end(), 0);
+        }
 
         template <size_t u>
         constexpr UInt(const UInt<u>& other) {
@@ -46,6 +48,7 @@ namespace fpga::utils {
             else {
                 std::copy(other.data.begin(), other.data.begin() + UInt<w>::n, data.begin());
             }
+            clear_invalid_bits();
         }
 
         template <size_t u>
@@ -57,6 +60,7 @@ namespace fpga::utils {
             else {
                 std::move(other.data.begin(), other.data.begin() + UInt<w>::n, data.begin());
             }
+            clear_invalid_bits();
         }
 
         template <size_t u>
@@ -68,6 +72,7 @@ namespace fpga::utils {
             else {
                 std::copy(other.data.begin(), other.data.begin() + UInt<w>::n, data.begin());
             }
+            clear_invalid_bits();
             return *this;
         }
 
@@ -80,6 +85,7 @@ namespace fpga::utils {
             else {
                 std::move(other.data.begin(), other.data.begin() + UInt<w>::n, data.begin());
             }
+            clear_invalid_bits();
             return *this;
         }
 
@@ -119,22 +125,14 @@ namespace fpga::utils {
         }
 
         template <size_t u>
-        constexpr UInt<std::max(u, w)> operator&(const UInt<u>& other) const {
-            UInt<std::max(u, w)> result;
-            // 因为 0 & 1 = 0，所以这里需要先转换成前缀 1 的形式
-            set_invalid_bits();
-            other.set_invalid_bits();
+        constexpr UInt<std::min(u, w)> operator&(const UInt<u>& other) const {
+            UInt<std::min(u, w)> result;
             if constexpr (UInt<u>::n < UInt<w>::n) {
                 std::transform(other.data.begin(), other.data.end(), data.begin(), result.begin(), std::bit_and<uint64_t>());
-                std::fill(result.data.begin() + UInt<u>::n, result.data.end(), 0);
             }
             else {
                 std::transform(data.begin(), data.end(), other.data.begin(), result.begin(), std::bit_and<uint64_t>());
-                std::fill(result.data.begin() + UInt<w>::n, result.data.end(), 0);
             }
-            // 计算完成之后再将无效位清除
-            clear_invalid_bits();
-            other.clear_invalid_bits();
             return result;
         }
 
@@ -253,11 +251,11 @@ namespace fpga::utils {
         }
 
         friend constexpr UInt<w> operator-(const UInt<w>& lhs, uint64_t rhs) {
-            return lhs - UInt<64>(rhs);
+            return lhs - UInt<w>(rhs);
         }
 
         friend constexpr UInt<w> operator-(uint64_t lhs, const UInt<w>& rhs) {
-            return UInt<64>(lhs) - rhs;
+            return UInt<w>(lhs) - rhs;
         }
 
         // 赋值运算符
