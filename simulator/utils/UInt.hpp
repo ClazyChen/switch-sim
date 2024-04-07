@@ -53,6 +53,7 @@ namespace fpga::utils {
             else {
                 std::copy(other.data.begin(), other.data.begin() + UInt<w>::n, data.begin());
             }
+            clear_invalid_bits();
         }
 
         template <size_t u>
@@ -64,6 +65,7 @@ namespace fpga::utils {
             else {
                 std::move(other.data.begin(), other.data.begin() + UInt<w>::n, data.begin());
             }
+            clear_invalid_bits();
         }
 
         template <size_t u>
@@ -117,11 +119,10 @@ namespace fpga::utils {
         }
 
         template <size_t u>
-        constexpr UInt<std::max(u, w)> operator&(const UInt<u>& other) const {
-            UInt<std::max(u, w)> result;
+        constexpr UInt<std::min(u, w)> operator&(const UInt<u>& other) const {
+            UInt<std::min(u, w)> result;
             // 因为 0 & 1 = 0，所以这里需要先转换成前缀 1 的形式
-            //set_invalid_bits();
-            //other.set_invalid_bits();
+
             if constexpr (UInt<u>::n < UInt<w>::n) {
                 std::transform(other.data.begin(), other.data.end(), data.begin(), result.data.begin(), std::bit_and<uint64_t>());
                 std::fill(result.data.begin() + UInt<u>::n, result.data.end(), 0);
