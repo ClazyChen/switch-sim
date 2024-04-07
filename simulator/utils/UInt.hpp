@@ -108,11 +108,11 @@ namespace fpga::utils {
         constexpr UInt<std::max(u, w)> operator|(const UInt<u>& other) const {
             UInt<std::max(u, w)> result;
             if constexpr (UInt<u>::n < UInt<w>::n) {
-                std::transform(other.data.begin(), other.data.end(), data.begin(), result.begin(), std::bit_or<uint64_t>());
+                std::transform(other.data.begin(), other.data.end(), data.begin(), result.data.begin(), std::bit_or<uint64_t>());
                 std::copy(data.begin() + UInt<u>::n, data.end(), result.data.begin() + UInt<u>::n);
             }
             else {
-                std::transform(data.begin(), data.end(), other.data.begin(), result.begin(), std::bit_or<uint64_t>());
+                std::transform(data.begin(), data.end(), other.data.begin(), result.data.begin(), std::bit_or<uint64_t>());
                 std::copy(other.data.begin() + UInt<w>::n, other.data.end(), result.data.begin() + UInt<w>::n);
             }
             return result;
@@ -142,11 +142,11 @@ namespace fpga::utils {
         constexpr UInt<std::max(u, w)> operator^(const UInt<u>& other) const {
             UInt<std::max(u, w)> result;
             if constexpr (UInt<u>::n < UInt<w>::n) {
-                std::transform(other.data.begin(), other.data.end(), data.begin(), result.begin(), std::bit_xor<uint64_t>());
+                std::transform(other.data.begin(), other.data.end(), data.begin(), result.data.begin(), std::bit_xor<uint64_t>());
                 std::copy(data.begin() + UInt<u>::n, data.end(), result.data.begin() + UInt<u>::n);
             }
             else {
-                std::transform(data.begin(), data.end(), other.data.begin(), result.begin(), std::bit_xor<uint64_t>());
+                std::transform(data.begin(), data.end(), other.data.begin(), result.data.begin(), std::bit_xor<uint64_t>());
                 std::copy(other.data.begin() + UInt<w>::n, other.data.end(), result.data.begin() + UInt<w>::n);
             }
             return result;

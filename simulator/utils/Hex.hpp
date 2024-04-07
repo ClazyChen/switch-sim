@@ -8,10 +8,10 @@ namespace fpga::utils {
     struct Hex {
 
         // TODO: 非常丑陋的语法，有没有更好的方法？
-        template <const char* const* const str>
+        template <const char* const* str, size_t N>
         static constexpr auto from() {
-            constexpr size_t n = std::strlen(*str);
-            constexpr size_t w = n * 4;
+            constexpr size_t n = N / 4; // 一个十六进制字符占 4 位
+            constexpr size_t w = N;
             UInt<w> result{};
             for (size_t i = 0; i < UInt<w>::n; i++) {
                 std::from_chars(
