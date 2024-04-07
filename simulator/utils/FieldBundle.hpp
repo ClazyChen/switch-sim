@@ -21,6 +21,13 @@ namespace fpga::utils {
         std::array<uint16_t, count16> field16;
         std::array<uint32_t, count32> field32;
 
+        constexpr FieldBundle() = default;
+        constexpr FieldBundle(
+            const std::array<int, count8>& field8,
+            const std::array<int, count16>& field16,
+            const std::array<int, count32>& field32
+        ) : field8(field8), field16(field16), field32(field32) {}
+
         uint64_t _field8(size_t index) const {
             return field8[index];
         }

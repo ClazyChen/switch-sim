@@ -8,7 +8,7 @@
 #include <fstream>
 #include <array>
 
-namespace fpga::mat {
+namespace fpga::p4 {
     template<
         size_t FIELD8_NUM,
         size_t FIELD16_NUM,
@@ -19,9 +19,9 @@ namespace fpga::mat {
     struct MatInput : public fpga::utils::Module {
 
         //PROFILE profile;
-        std::vector<std::shared_ptr<fpga::mat::MatPacket>> packets;
+        std::vector<std::shared_ptr<fpga::p4::MatPacket>> packets;
         struct IO {
-            fpga::utils::Out<fpga::mat::MatPacket> packet_out;
+            fpga::utils::Out<fpga::p4::MatPacket> packet_out;
         } io;
 
         void reset() override {

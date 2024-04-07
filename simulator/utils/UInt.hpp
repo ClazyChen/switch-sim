@@ -152,6 +152,7 @@ namespace fpga::utils {
 
         constexpr UInt<w> operator~() const {
             UInt<w> result;
+            result.clear();
             std::transform(data.begin(), data.end(), result.data.begin(), std::bit_not<uint64_t>());
             result.clear_invalid_bits();
             return result;
@@ -229,6 +230,7 @@ namespace fpga::utils {
 
         friend constexpr UInt<w> operator+(const UInt<w>& lhs, uint64_t rhs) {
             UInt<w> result;
+            result.clear();
             result.data[0] = lhs.data[0] + rhs;
             uint64_t carry = result.data[0] < lhs.data[0];
             for (size_t i = 1; i < n; i++) {
@@ -253,11 +255,11 @@ namespace fpga::utils {
         }
 
         friend constexpr UInt<w> operator-(const UInt<w>& lhs, uint64_t rhs) {
-            return lhs - UInt<64>(rhs);
+            return lhs - UInt<w>(rhs);
         }
 
         friend constexpr UInt<w> operator-(uint64_t lhs, const UInt<w>& rhs) {
-            return UInt<64>(lhs) - rhs;
+            return UInt<w>(lhs) - rhs;
         }
 
         // 赋值运算符
