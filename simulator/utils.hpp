@@ -11,6 +11,8 @@
 #include "utils/Module.hpp"
 #include "utils/PacketGenerator.hpp"
 #include "utils/InputAnalyzer.hpp"
+#include "utils/Hex.hpp"
+#include "utils/Piped.hpp"
 
 #include "Config.hpp"
 #include "program/Program.hpp"

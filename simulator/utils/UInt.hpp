@@ -55,7 +55,7 @@ namespace fpga::utils {
                 std::fill(data.begin() + UInt<u>::n, data.end(), 0);
             }
             else {
-                std::move(other.begin(), other.begin() + UInt<w>::n, data.begin());
+                std::move(other.data.begin(), other.data.begin() + UInt<w>::n, data.begin());
             }
         }
 
@@ -83,6 +83,7 @@ namespace fpga::utils {
             return *this;
         }
 
+        // 和 uint64_t 之间的转换
         constexpr UInt(uint64_t value) {
             data[0] = value;
             std::fill(data.begin() + 1, data.end(), 0);
@@ -92,6 +93,14 @@ namespace fpga::utils {
             data[0] = value;
             std::fill(data.begin() + 1, data.end(), 0);
             return *this;
+        }
+
+        constexpr operator uint64_t() const {
+            return data[0];
+        }
+
+        constexpr uint64_t value() const {
+            return data[0];
         }
 
         // 定义所有运算符
@@ -296,6 +305,11 @@ namespace fpga::utils {
         // 取单个比特
         constexpr uint64_t operator()(size_t index) const {
             return (data[index / 64] >> (index % 64)) & 1;
+        }
+
+        // 设置单个比特
+        constexpr void set(size_t index, uint64_t value) {
+            data[index / 64] |= (value & 1) << (index % 64);
         }
 
         // 取 slice，编译期

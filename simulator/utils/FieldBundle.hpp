@@ -17,7 +17,7 @@ namespace fpga::utils {
         // 硬件语义下的宽度
         static constexpr size_t width = 8 * count8 + 16 * count16 + 32 * count32;
 
-        std::array<uint8_t, count8> field8;
+        std::array<uint16_t, count8> field8;
         std::array<uint16_t, count16> field16;
         std::array<uint32_t, count32> field32;
 
@@ -31,6 +31,20 @@ namespace fpga::utils {
 
         uint64_t _field32(size_t index) const {
             return field32[index];
+        }
+
+        template <size_t width>
+        requires (width == 8 || width == 16 || width == 32)
+        uint64_t field(size_t index) const {
+            if constexpr (width == 8) {
+                return _field8(index);
+            }
+            if constexpr (width == 16) {
+                return _field16(index);
+            }
+            if constexpr (width == 32) {
+                return _field32(index);
+            }
         }
 
         // 转换为 UInt<width>

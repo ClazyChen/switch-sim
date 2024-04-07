@@ -27,5 +27,6 @@ fpga::test::TestApplication<
 
 int main()
 {
+	test_app.run("input.txt", "output.txt", 100);
 	return 0;
 }

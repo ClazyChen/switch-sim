@@ -37,13 +37,13 @@ namespace fpga::cases::basic {
             input.update();
 
             // 从输入模块读取数据
-            pipeline.io.pipe.phv_in = input.io.packet_out;
+            pipeline.io.pipe.in = input.io.packet_out;
 
             // 流水线内部逻辑
             pipeline.update();
 
             // 向输出模块发射数据
-            output.io.packet_in = pipeline.io.pipe.phv_out;
+            output.io.packet_in = pipeline.io.pipe.out;
 
             // 输出模块（视为组合逻辑电路）
             output.update();

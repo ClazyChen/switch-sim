@@ -23,7 +23,7 @@ namespace fpga::p4::mat::getkey {
 		}
 
 		void run() override {
-			if (io.pipe.phv_in) {
+			if (io.pipe.in) {
 				load_key<GetKeyConfig<mau_id>::Lookup>(io.lookup_key_out.get());
 				load_key<GetKeyConfig<mau_id>::Gateway>(io.gateway_key_out.get());
             }
@@ -51,7 +51,7 @@ namespace fpga::p4::mat::getkey {
 		template <size_t width>
 			requires (width == 8 || width == 16 || width == 32)
 		constexpr uint64_t get_container(size_t container_id) const {
-			const auto& phv = io.pipe.phv_in.get();
+			const auto& phv = io.pipe.in.get();
 			if constexpr (fpga::Config::mat::getkey::any_connect) {
 				if (container_id < fpga::Config::phv::field8_count) {
 					return phv.field8[container_id];

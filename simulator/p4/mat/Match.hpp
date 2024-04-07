@@ -1,7 +1,8 @@
 #pragma once
 
 #include "getkey/GetKey.hpp"
-#include "getkey/GetKeyConfig.hpp"
+#include "gateway/Gateway.hpp"
+#include "hash/Hash.hpp"
 
 namespace fpga::p4::mat {
 
@@ -13,26 +14,37 @@ namespace fpga::p4::mat {
 
         // 每一级流水线
         getkey::Getkey<mau_id> getkey;
+        gateway::Gateway<mau_id> gateway;
+        hash::Hash<mau_id> hash;
 
         void reset() override {
             io.pipe.reset();
             getkey.reset();
+            gateway.reset();
+            hash.reset();
         }
 
         void update() override {
             // 传入每一级流水线的 input
-            io.pipe.input_to(getkey.io.pipe);
+            io.pipe >> getkey.io.pipe;
+            getkey.io.pipe > gateway.io.pipe;
+            gateway.io.pipe > hash.io.pipe;
 
             // 运行每一级流水线的 update
             getkey.update();
+            gateway.update();
+            hash.update();
         }
-        
+
         void run() override {
             // 运行每一级流水线的 run
             getkey.run();
-            
+            gateway.run();
+            hash.run();
+
             // 将最后一级流水线的输出传递给出去
-            getkey.io.pipe.output_to(io.pipe);
+            io.pipe << hash.io.pipe;
+
         }
 
     };

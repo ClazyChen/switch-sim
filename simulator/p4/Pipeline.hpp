@@ -45,12 +45,12 @@ namespace fpga::p4 {
 
         void update() override {
             // 传入每一级流水线的 input
-            io.pipe.input_to(*pipes[0]);
+            io.pipe >> *pipes[0];
             
             // 需要注意的是 update 只用于更新每一级的 input 并完成其内部组合逻辑
             // 但不会将 output 传递到下一级，所以先传入 input 再 update
             for (size_t i = 0; i < N - 1; i++) {
-                pipes[i]->transport_to(*pipes[i + 1]);
+                *pipes[i] > *pipes[i + 1];
             }
 
             // 运行每一级流水线的 update
@@ -67,7 +67,7 @@ namespace fpga::p4 {
             }
 
             // 传出最后一级流水线的 output
-            pipes[N - 1]->output_to(io.pipe);
+            io.pipe << *pipes[N - 1];
         }
         
 

@@ -2,6 +2,7 @@
 
 #include "Module.hpp"
 #include "Wire.hpp"
+#include "Piped.hpp"
 #include <array>
 #include <algorithm>
 
@@ -24,7 +25,12 @@ namespace fpga::utils {
             io{in, out} {
             // 直接连接输入输出（采用引用）
         }
-        
+
+        Delay(Piped<T>& pipe) :
+            io{ pipe.in, pipe.out } {
+
+        }
+
         // 重置模块接口
         void reset() override {
             // 没有任何效果

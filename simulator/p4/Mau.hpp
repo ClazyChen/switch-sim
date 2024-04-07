@@ -21,7 +21,7 @@ namespace fpga::p4 {
 
         void update() override {
             // 传入每一级流水线的 input
-            io.pipe.input_to(match.io.pipe);
+            io.pipe >> match.io.pipe;
 
             // 运行每一级流水线的 update
             match.update();
@@ -32,7 +32,7 @@ namespace fpga::p4 {
             match.run();
 
             // 将最后一级流水线的输出传递给出去
-            match.io.pipe.output_to(io.pipe);
+            io.pipe << match.io.pipe;
         }
 
     };

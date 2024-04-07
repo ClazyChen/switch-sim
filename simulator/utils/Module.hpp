@@ -16,10 +16,14 @@ namespace fpga::utils {
         }
 
         // 更新模块的输出（组合逻辑）
-        virtual void update() = 0;
+        virtual void update() {
+            // do nothing
+        }
         
         // 运行模块（模拟一个时钟周期）
-        virtual void run() = 0;
+        virtual void run() {
+            // do nothing
+        }
 
         // 对于每个周期的功能，总是先 update 再 run
         void tick() {
