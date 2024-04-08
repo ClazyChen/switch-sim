@@ -18,11 +18,11 @@ namespace fpga::p4::mem {
 
     public:
         struct IO {
-            // ËùÓĞµÄ¶ÁÁ¬½ÓÏß
+            // æ‰€æœ‰çš„è¯»è¿æ¥çº¿
             std::array<SramClusterRead, match_read_count> match_read;
             std::array<SramClusterRead, salu_read_count> salu_read;
 
-            // ËùÓĞµÄĞ´Á¬½ÓÏß
+            // æ‰€æœ‰çš„å†™è¿æ¥çº¿
             std::array<SramClusterWrite, salu_write_count> salu_write;
             std::array<SramClusterWrite, ctrl_write_count> ctrl_write;
         } io;
@@ -54,7 +54,7 @@ namespace fpga::p4::mem {
         }
 
         void update() {
-            // ½«ËùÓĞµÄ¶ÁĞ´Á¬½ÓÏßµÄÊı¾İÁ¬µ½¶ÔÓ¦µÄSRAMÉÏ
+            // å°†æ‰€æœ‰çš„è¯»å†™è¿æ¥çº¿çš„æ•°æ®è¿åˆ°å¯¹åº”çš„SRAMä¸Š
             for (size_t i = 0; i < sram_count; i++) {
                 srams[i].io.r.en = false;
                 sram_read_addrs[i] = 0;
@@ -86,19 +86,19 @@ namespace fpga::p4::mem {
                 srams[i].io.w.data = sram_write_datas[i];
             }
 
-            // ¸üĞÂËùÓĞµÄSRAM£¨Ö´ĞĞĞ´£©
+            // æ›´æ–°æ‰€æœ‰çš„SRAMï¼ˆæ‰§è¡Œå†™ï¼‰
             for (size_t i = 0; i < sram_count; i++) {
                 srams[i].update();
             }
         }
 
         void run() {
-            // ÔËĞĞËùÓĞµÄSRAM£¨Ö´ĞĞ¶Á£©
+            // è¿è¡Œæ‰€æœ‰çš„SRAMï¼ˆæ‰§è¡Œè¯»ï¼‰
             for (size_t i = 0; i < sram_count; i++) {
                 srams[i].run();
             }
 
-            // ½«SRAMµÄÊı¾İ´«µİ¸ø¶ÁÁ¬½ÓÏß
+            // å°†SRAMçš„æ•°æ®ä¼ é€’ç»™è¯»è¿æ¥çº¿
             for (size_t i = 0; i < reads.size(); i++) {
                 auto& read = *reads[i];
                 read.data = srams[read.sram_id.get().value()].io.r.data;
