@@ -45,16 +45,15 @@ namespace fpga::p4::mat::hash {
         Delay<Phv, pipeline_level_count, In> delay_phv{ io.pipe };
         Delay<LookupKey, pipeline_level_count, In> delay_key{ io.key };
         Delay<UInt<gateway_width>, pipeline_level_count, In> delay_gateway{ io.gateway };
-        // std::vector<std::unique_ptr<Delay<HashValue, pipeline_level_count>>> delay_hash;
+        std::vector<std::unique_ptr<Delay<HashValue, pipeline_level_count>>> delay_hash;
 
     public:
         Hash() {
             init<0>();
-            /*for (size_t i = 0; i < count; i++) {
-                delay_hash.push_back(
-                    std::make_unique<Delay<HashValue, pipeline_level_count>>(temp_hash[i], io.hash_out[i]);
-                );
-            }*/
+            for (size_t i = 0; i < count; i++) {
+                auto temp = std::make_unique<Delay<HashValue, pipeline_level_count>>(temp_hash[i], io.hash_out[i]);
+                delay_hash.push_back(std::move(temp));
+            }
         }
 
         void reset() override {
@@ -82,9 +81,9 @@ namespace fpga::p4::mat::hash {
             delay_phv.run();
             delay_gateway.run();
             delay_key.run();
-            /*for (auto& delay : delay_hash) {
+            for (auto& delay : delay_hash) {
                 delay->run();
-            }*/
+            }
         }
     };
 
