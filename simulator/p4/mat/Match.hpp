@@ -30,6 +30,9 @@ namespace fpga::p4::mat {
             getkey.io.pipe > gateway.io.pipe;
             gateway.io.pipe > hash.io.pipe;
 
+            gateway.io.lookup_key_in = getkey.io.lookup_key_out;
+            gateway.io.gateway_key_in = getkey.io.gateway_key_out;
+
             // 运行每一级流水线的 update
             getkey.update();
             gateway.update();
