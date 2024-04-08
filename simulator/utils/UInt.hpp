@@ -307,7 +307,13 @@ namespace fpga::utils {
 
         // 设置单个比特
         constexpr void set(size_t index, uint64_t value) {
-            data[index / 64] |= (value & 1) << (index % 64);
+            if (value == 1) {
+                data[index / 64] |= (value & 1) << (index % 64);
+            }
+            else {
+                data[index / 64] &= (~(1ULL << (index % 64)));
+            }
+            
         }
 
         // 取 slice，编译期
