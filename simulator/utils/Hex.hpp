@@ -16,7 +16,7 @@ namespace fpga::utils {
             for (size_t i = 0; i < UInt<w>::n; i++) {
                 std::from_chars(
                     *str + n - 1 - std::max(n - 1, i * 16 + 15),
-                    *str + n - 1 - i * 16,
+                    *str + n  - i * 16,
                     result.data[i],
                     16
                 );
