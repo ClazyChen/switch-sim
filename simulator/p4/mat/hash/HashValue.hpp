@@ -27,6 +27,10 @@ namespace fpga::p4::mat::hash {
             return *this;
         }
 
+        constexpr UInt<width> asUInt() const {
+            return *this;
+        }
+
         constexpr UInt<chip_select_width> chip_select() const {
             return slice<width - 1, width - chip_select_width>();
         }

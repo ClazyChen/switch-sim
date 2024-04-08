@@ -47,6 +47,20 @@ namespace fpga::utils {
             }
         }
 
+        template <size_t width>
+        requires (width == 8 || width == 16 || width == 32)
+        void set_field(size_t index, uint64_t value) {
+            if constexpr (width == 8) {
+                field8[index] = value;
+            }
+            if constexpr (width == 16) {
+                field16[index] = value;
+            }
+            if constexpr (width == 32) {
+                field32[index] = value;
+            }
+        }
+
         // 转换为 UInt<width>
         UInt<width> asUInt() const {
             UInt<width> result;

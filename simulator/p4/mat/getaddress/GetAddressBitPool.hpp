@@ -30,7 +30,30 @@ namespace fpga::p4::mat::getaddress {
         }
 
         void update() override {
+            for (size_t i = 0; i < read_count; i++) {
+                for (size_t j = 0; j < vaddr_width; j++) {
+                    io.vaddr_out[i].get().set(j, bit_pool(
+                        Program<mau_id>::mat::getaddress::bit_pool[i * vaddr_width + j]
+                    ));
+                }
+            }
+        }
 
+    private:
+
+        // 返回比特池中的某一位
+        constexpr uint64_t bit_pool(size_t index) {
+            if (index < hash_cs_width * hash_count) {
+                return io.hash_in[index / hash_cs_width].get()(index % hash_cs_width);
+            }
+            else {
+                index -= hash_cs_width * hash_count;
+                if constexpr (explicit_zero) {
+                    if (index == 0) {
+                        return 0;
+                    }
+                }
+            }
         }
     };
 
