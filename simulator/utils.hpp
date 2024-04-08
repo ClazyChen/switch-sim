@@ -13,6 +13,7 @@
 #include "utils/InputAnalyzer.hpp"
 #include "utils/Hex.hpp"
 #include "utils/Piped.hpp"
+#include "utils/Sram.hpp"
 
 #include "Config.hpp"
 #include "program/Program.hpp"

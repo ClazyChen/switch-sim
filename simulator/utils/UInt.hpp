@@ -128,10 +128,10 @@ namespace fpga::utils {
         constexpr UInt<std::min(u, w)> operator&(const UInt<u>& other) const {
             UInt<std::min(u, w)> result;
             if constexpr (UInt<u>::n < UInt<w>::n) {
-                std::transform(other.data.begin(), other.data.end(), data.begin(), result.begin(), std::bit_and<uint64_t>());
+                std::transform(other.data.begin(), other.data.end(), data.begin(), result.data.begin(), std::bit_and<uint64_t>());
             }
             else {
-                std::transform(data.begin(), data.end(), other.data.begin(), result.begin(), std::bit_and<uint64_t>());
+                std::transform(data.begin(), data.end(), other.data.begin(), result.data.begin(), std::bit_and<uint64_t>());
             }
             return result;
         }
