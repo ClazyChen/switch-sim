@@ -36,8 +36,8 @@ namespace fpga::p4::mat::gateway {
                 auto& value = io.gateway_in.get();
                 io.gateway_out = 
                     GatewayTranslateConfig<mau_id>::translate(
-                        value.slice<15, 8>().value() + 
-                        value.slice<7, 0>().value()
+                        value.slice<15, 8>() + 
+                        value.slice<7, 0>()
                     );
             }
             else {
