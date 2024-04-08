@@ -40,6 +40,8 @@ add_executable (simulator
     "p4/mat/hash/HashUnit.hpp"
     "p4/mat/hash/HashUnitConfig.hpp"
     "p4/mat/hash/HashValue.hpp"
+    "p4/mem/SramCluster.hpp"
+    "p4/mem/SramClusterReadWrite.hpp"
     "program/Program.hpp"
     "test/Console.hpp"
     "test/TestApplication.hpp"
@@ -56,6 +58,7 @@ add_executable (simulator
     "utils/PacketGenerator.hpp"
     "utils/Piped.hpp"
     "utils/Random.hpp"
+    "utils/Sram.hpp"
     "utils/UInt.hpp"
     "utils/Wire.hpp"
 )
