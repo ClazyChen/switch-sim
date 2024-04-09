@@ -2,6 +2,7 @@
 
 #include "../../../utils.hpp"
 #include "../../FieldBundleProfileOf.hpp"
+#include <iostream>
 
 namespace fpga::p4::mat::hash {
 
@@ -24,7 +25,10 @@ namespace fpga::p4::mat::hash {
         // 编译期初始化
         template <size_t I, size_t J> requires (0 <= J && J < value_width)
             void init_matrix() {
-            auto unit = Hex::from<&Program<mau_id>::mat::hash::matrix[I * value_width + J], unit_size>();
+            auto unit = Hex::from<unit_size>(&Program<mau_id>::mat::hash::matrix[I * value_width + J]);
+           // const char* x = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+            //auto unit = Hex::from<&x, unit_size>();
+            std::cout << "before: " << Program<mau_id>::mat::hash::matrix[I * value_width + J] << std::endl;
             matrices[I][J] = 0;
             for (size_t k = 0; k < key_width / unit_size; k++) {
                 matrices[I][J] = (matrices[I][J] << unit_size) | unit;
@@ -36,8 +40,10 @@ namespace fpga::p4::mat::hash {
 
         template <size_t I> requires (0 <= I && I < hash_count)
             void init() {
-            masks[I] = Hex::from<&Program<mau_id>::mat::hash::mask[I], key_width>();
-            salts[I] = Hex::from<&Program<mau_id>::mat::hash::salt[I], value_width>();
+            masks[I] = Hex::from<key_width>(&Program<mau_id>::mat::hash::mask[I]);
+            std::cout << "before: " << Program<mau_id>::mat::hash::mask[I] << std::endl;
+            salts[I] = Hex::from<value_width>(&Program<mau_id>::mat::hash::salt[I]);
+            std::cout << "before: " << Program<mau_id>::mat::hash::salt[I] << std::endl;
             init_matrix<I, 0>();
             if constexpr (I + 1 < hash_count) {
                 init<I + 1>();

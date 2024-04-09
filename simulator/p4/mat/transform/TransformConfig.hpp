@@ -15,9 +15,9 @@ namespace fpga::p4::mat::transform {
         template <size_t I> requires (I < value_count)
             constexpr auto init() {
             _default_value[I] = Hex::from<
-                &Program<mau_id>::mat::transform::default_value[I],
+               
                 value_width
-            >();
+            >(&Program<mau_id>::mat::transform::default_value[I]);
             if constexpr (I + 1 < value_count) {
                 init<I + 1>();
             }
