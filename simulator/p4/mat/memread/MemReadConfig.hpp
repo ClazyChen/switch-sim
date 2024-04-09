@@ -5,7 +5,7 @@
 namespace fpga::p4::mat::memread {
 
     template <size_t mau_id>
-    struct MemReadConfig : public Module {
+    struct MemReadConfig {
 
         static constexpr size_t gateway_width = fpga::Config::mat::gateway::width;
 

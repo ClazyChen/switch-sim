@@ -14,6 +14,7 @@
 #include "utils/Hex.hpp"
 #include "utils/Piped.hpp"
 #include "utils/Sram.hpp"
+#include "utils/Log2Ceil.hpp"
 
 #include "Config.hpp"
 #include "program/Program.hpp"

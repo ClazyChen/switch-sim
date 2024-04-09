@@ -5,6 +5,7 @@
 #include "hash/Hash.hpp"
 #include "getaddress/GetAddress.hpp"
 #include "memread/MemRead.hpp"
+#include "compare/Compare.hpp"
 
 namespace fpga::p4::mat {
 
@@ -26,6 +27,7 @@ namespace fpga::p4::mat {
         hash::Hash<mau_id> hash;
         getaddress::GetAddress<mau_id> getaddress;
         memread::MemRead<mau_id> memread;
+        compare::Compare<mau_id> compare;
 
         void reset() override {
             io.pipe.reset();
@@ -34,6 +36,7 @@ namespace fpga::p4::mat {
             hash.reset();
             getaddress.reset();
             memread.reset();
+            compare.reset();
         }
 
         void update() override {
@@ -43,6 +46,7 @@ namespace fpga::p4::mat {
             gateway.io.pipe > hash.io.pipe;
             hash.io.pipe > getaddress.io.pipe;
             getaddress.io.pipe > memread.io.pipe;
+            memread.io.pipe > compare.io.pipe;
 
             // 其他连线
             gateway.io.lookup_key_in = getkey.io.lookup_key_out;
@@ -60,8 +64,9 @@ namespace fpga::p4::mat {
             std::copy(getaddress.io.sram_id_out.begin(), getaddress.io.sram_id_out.end(), memread.io.sram_id_in.begin());
             std::copy(getaddress.io.on_chip_addr_out.begin(), getaddress.io.on_chip_addr_out.end(), memread.io.on_chip_addr_in.begin());
 
-            gateway.io.lookup_key_in = getkey.io.lookup_key_out;
-            gateway.io.gateway_key_in = getkey.io.gateway_key_out;
+            compare.io.key_in = memread.io.key.out;
+            std::copy(memread.io.read_en_out.begin(), memread.io.read_en_out.end(), compare.io.read_en_in.begin());
+            std::copy(memread.io.read_out.begin(), memread.io.read_out.end(), compare.io.read_in.begin());
 
             // 运行每一级流水线的 update
             getkey.update();
@@ -69,6 +74,7 @@ namespace fpga::p4::mat {
             hash.update();
             getaddress.update();
             memread.update();
+            compare.update();
 
             // 传递组合逻辑的输出
             std::copy(memread.io.match_read.begin(), memread.io.match_read.end(), io.match_read.begin());
@@ -81,6 +87,7 @@ namespace fpga::p4::mat {
             hash.run();
             getaddress.run();
             memread.run();
+            compare.run();
 
             // 将最后一级流水线的输出传递给出去
             io.pipe << memread.io.pipe;

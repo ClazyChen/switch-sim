@@ -31,7 +31,7 @@ namespace fpga::p4::mat::memread {
         } io;
 
     private:
-        // »º´æ read_en ºÍ read_out
+        // ç¼“å­˜ read_en å’Œ read_out
         std::array<Wire<bool>, read_count> read_en;
         std::array<Wire<UInt<sram_data_width>>, read_count> read_data;
 
@@ -64,7 +64,7 @@ namespace fpga::p4::mat::memread {
             }
         }
 
-        // ÒÔ×éºÏÂß¼­Éú³É¶ÁÈ¡µÄÇëÇó
+        // ä»¥ç»„åˆé€»è¾‘ç”Ÿæˆè¯»å–çš„è¯·æ±‚
         void update() override {
             if (io.pipe.in) {
                 for (size_t i = 0; i < read_count; i++) {
@@ -75,14 +75,14 @@ namespace fpga::p4::mat::memread {
                 }
             }
             else {
-                // ÔÚÃ»ÓĞÊı¾İ°üµÄÇé¿öÏÂÒ²²»ĞèÒª¶ÁÈ¡
+                // åœ¨æ²¡æœ‰æ•°æ®åŒ…çš„æƒ…å†µä¸‹ä¹Ÿä¸éœ€è¦è¯»å–
                 for (size_t i = 0; i < read_count; i++) {
                     io.match_read[i].en = false;
                     io.match_read[i].sram_id = 0;
                     io.match_read[i].addr = 0;
                 }
             }
-            // ÎŞÂÛÓĞÃ»ÓĞÊı¾İ°ü¶¼ĞèÒª½ÓÊÕÉÏÒ»¸öÖÜÆÚ¶ÁÈ¡µÄ½á¹û
+            // æ— è®ºæœ‰æ²¡æœ‰æ•°æ®åŒ…éƒ½éœ€è¦æ¥æ”¶ä¸Šä¸€ä¸ªå‘¨æœŸè¯»å–çš„ç»“æœ
             for (size_t i = 0; i < read_count; i++) {
                 read_data[i] = io.match_read[i].data;
             }
