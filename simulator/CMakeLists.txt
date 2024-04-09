@@ -44,6 +44,8 @@ add_executable (simulator
     "p4/mat/hash/HashValue.hpp"
     "p4/mat/memread/MemRead.hpp"
     "p4/mat/memread/MemReadConfig.hpp"
+    "p4/mat/transform/Transform.hpp"
+    "p4/mat/transform/TransformConfig.hpp"
     "p4/mem/SramCluster.hpp"
     "p4/mem/SramClusterReadWrite.hpp"
     "program/Program.hpp"

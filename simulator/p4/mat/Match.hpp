@@ -6,6 +6,7 @@
 #include "getaddress/GetAddress.hpp"
 #include "memread/MemRead.hpp"
 #include "compare/Compare.hpp"
+#include "transform/Transform.hpp"
 
 namespace fpga::p4::mat {
 
@@ -14,10 +15,13 @@ namespace fpga::p4::mat {
         
     private:
         static constexpr size_t read_count = fpga::Config::mat::getaddress::read_count;
+        static constexpr size_t value_count = fpga::Config::mat::transform::value_count;
+        static constexpr size_t value_width = fpga::Config::mat::transform::value_width;
 
     public:
         struct IO {
             Pipe pipe;
+            std::array<Out<UInt<value_width>>, value_count> value_out;
             std::array<fpga::p4::mem::SramClusterRead, read_count> match_read;
         } io;
 
@@ -28,6 +32,7 @@ namespace fpga::p4::mat {
         getaddress::GetAddress<mau_id> getaddress;
         memread::MemRead<mau_id> memread;
         compare::Compare<mau_id> compare;
+        transform::Transform<mau_id> transform;
 
         void reset() override {
             io.pipe.reset();
@@ -37,6 +42,7 @@ namespace fpga::p4::mat {
             getaddress.reset();
             memread.reset();
             compare.reset();
+            transform.reset();
         }
 
         void update() override {
@@ -47,6 +53,7 @@ namespace fpga::p4::mat {
             hash.io.pipe > getaddress.io.pipe;
             getaddress.io.pipe > memread.io.pipe;
             memread.io.pipe > compare.io.pipe;
+            compare.io.pipe > transform.io.pipe;
 
             // 其他连线
             gateway.io.lookup_key_in = getkey.io.lookup_key_out;
@@ -68,6 +75,10 @@ namespace fpga::p4::mat {
             std::copy(memread.io.read_en_out.begin(), memread.io.read_en_out.end(), compare.io.read_en_in.begin());
             std::copy(memread.io.read_out.begin(), memread.io.read_out.end(), compare.io.read_in.begin());
 
+            std::copy(compare.io.read_en_out.begin(), compare.io.read_en_out.end(), transform.io.read_en_in.begin());
+            std::copy(compare.io.hit_out.begin(), compare.io.hit_out.end(), transform.io.hit_in.begin());
+            std::copy(compare.io.value_out.begin(), compare.io.value_out.end(), transform.io.value_in.begin());
+
             // 运行每一级流水线的 update
             getkey.update();
             gateway.update();
@@ -75,6 +86,7 @@ namespace fpga::p4::mat {
             getaddress.update();
             memread.update();
             compare.update();
+            transform.update();
 
             // 传递组合逻辑的输出
             std::copy(memread.io.match_read.begin(), memread.io.match_read.end(), io.match_read.begin());
@@ -88,10 +100,13 @@ namespace fpga::p4::mat {
             getaddress.run();
             memread.run();
             compare.run();
+            transform.run();
 
             // 将最后一级流水线的输出传递给出去
-            io.pipe << memread.io.pipe;
+            io.pipe << transform.io.pipe;
 
+            // 传递查到的值，用于后续的处理
+            std::copy(transform.io.value_out.begin(), transform.io.value_out.end(), io.value_out.begin());
         }
 
     };

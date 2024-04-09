@@ -26,6 +26,7 @@ namespace fpga::p4::mat::compare {
             In<LookupKey> key_in;
             std::array<In<bool>, read_count> read_en_in;
             std::array<In<UInt<sram_data_width>>, read_count> read_in;
+            std::array<Out<bool>, kv_pair_count> read_en_out;
             std::array<Out<bool>, kv_pair_count> hit_out;
             std::array<Out<UInt<sram_data_width>>, kv_pair_count> value_out;
         } io;
@@ -37,6 +38,7 @@ namespace fpga::p4::mat::compare {
         void reset() override {
             io.pipe.reset();
             for (size_t i = 0; i < kv_pair_count; i++) {
+                io.read_en_out[i] = false;
                 io.hit_out[i] = false;
                 io.value_out[i] = 0;
             }
@@ -93,12 +95,14 @@ namespace fpga::p4::mat::compare {
                 for (size_t i = 0; i < kv_pair_count; i++) {
                     auto& part = parts[CompareConfig<mau_id>::key_part_index(i)].get();
                     auto mask = CompareConfig<mau_id>::mask(i);
-                    io.hit_out[i] = io.read_en_in[i] && ((io.read_in[read_key[i]].get() & mask) == (part & mask));
+                    io.read_en_out[i] = io.read_en_in[read_key[i]];
+                    io.hit_out[i] = io.read_en_in[read_key[i]] && ((io.read_in[read_key[i]].get() & mask) == (part & mask));
                     io.value_out[i] = io.read_in[read_value[i]];
                 }
             }
             else {
                 for (size_t i = 0; i < kv_pair_count; i++) {
+                    io.read_en_out[i] = false;
                     io.hit_out[i] = false;
                     io.value_out[i] = 0;
                 }
