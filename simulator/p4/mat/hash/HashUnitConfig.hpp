@@ -26,7 +26,6 @@ namespace fpga::p4::mat::hash {
         template <size_t I, size_t J> requires (0 <= J && J < value_width)
             void init_matrix() {
             auto unit = Hex::from<unit_size>(&Program<mau_id>::mat::hash::matrix[I * value_width + J]);
-            std::cout << "before: " << Program<mau_id>::mat::hash::matrix[I * value_width + J] << std::endl;
             matrices[I][J] = 0;
             for (size_t k = 0; k < key_width / unit_size; k++) {
                 std::cout << matrices[I][J].data[0] << "  ";
@@ -41,9 +40,7 @@ namespace fpga::p4::mat::hash {
         template <size_t I> requires (0 <= I && I < hash_count)
             void init() {
             masks[I] = Hex::from<key_width>(&Program<mau_id>::mat::hash::mask[I]);
-            std::cout << "before: " << Program<mau_id>::mat::hash::mask[I] << std::endl;
             salts[I] = Hex::from<value_width>(&Program<mau_id>::mat::hash::salt[I]);
-            std::cout << "before: " << Program<mau_id>::mat::hash::salt[I] << std::endl;
             init_matrix<I, 0>();
             if constexpr (I + 1 < hash_count) {
                 init<I + 1>();

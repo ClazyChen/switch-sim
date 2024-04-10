@@ -16,17 +16,10 @@ namespace fpga::utils {
             UInt<w> result{};
             std::cout << *str << " " << w << std::endl;
             for (size_t i = 0; i < UInt<w>::n; i++) {
-                /*std::from_chars(
-                    *str + n - 1 - std::max(n - 1, i * 16 + 15),
-                    *str + n - i * 16,
-                    result.data[i],
-                    16
-                );*/
                 std::string str_ = std::string(*str);
                 std::string hex_string = str_.substr(16 * i, 16);
                 std::stringstream ss(hex_string);
                 ss >> std::hex >> result.data[i];
-                //result.data[i] = std::stoll(hex_string, nullptr, 16);
             }
             return result;
         }
