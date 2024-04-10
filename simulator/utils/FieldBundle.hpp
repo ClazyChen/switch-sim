@@ -66,7 +66,7 @@ namespace fpga::utils {
             UInt<width> result;
             static_assert(width % 64 == 0);
             static_assert(count8 % 8 == 0 && count16 % 4 == 0 && count32 % 2 == 0);
-            for (size_t i = 0; i < count8 % 8; ++i) {
+            for (size_t i = 0; i < count8 / 8; ++i) {
                 result.data[i] =
                     (_field8(i * 8 + 7) << 56) |
                     (_field8(i * 8 + 6) << 48) |
@@ -77,16 +77,16 @@ namespace fpga::utils {
                     (_field8(i * 8 + 1) << 8) |
                     _field8(i * 8);
             }
-            size_t index = count8 % 8;
-            for (size_t i = 0; i < count16 % 4; ++i) {
+            size_t index = count8 / 8;
+            for (size_t i = 0; i < count16 / 4; ++i) {
                 result.data[index + i] =
                     (_field16(i * 4 + 3) << 48) |
                     (_field16(i * 4 + 2) << 32) |
                     (_field16(i * 4 + 1) << 16) |
                     _field16(i * 4);
             }
-            index += count16 % 4;
-            for (size_t i = 0; i < count32 % 2; ++i) {
+            index += count16 / 4;
+            for (size_t i = 0; i < count32 / 2; ++i) {
                 result.data[index + i] =
                     (_field32(i * 2 + 1) << 32) |
                     _field32(i * 2);
