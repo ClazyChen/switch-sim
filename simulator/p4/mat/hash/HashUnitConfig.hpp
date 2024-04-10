@@ -26,11 +26,11 @@ namespace fpga::p4::mat::hash {
         template <size_t I, size_t J> requires (0 <= J && J < value_width)
             void init_matrix() {
             auto unit = Hex::from<unit_size>(&Program<mau_id>::mat::hash::matrix[I * value_width + J]);
-           // const char* x = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-            //auto unit = Hex::from<&x, unit_size>();
             std::cout << "before: " << Program<mau_id>::mat::hash::matrix[I * value_width + J] << std::endl;
             matrices[I][J] = 0;
             for (size_t k = 0; k < key_width / unit_size; k++) {
+                std::cout << matrices[I][J].data[0] << "  ";
+                std::cout << (matrices[I][J].data[0] << unit_size) << std::endl;
                 matrices[I][J] = (matrices[I][J] << unit_size) | unit;
             }
             if constexpr (J + 1 < value_width) {
