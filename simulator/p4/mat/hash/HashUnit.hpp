@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+#include <bit>
 
 #include "HashUnitConfig.hpp"
 
@@ -19,9 +21,10 @@ namespace fpga::p4::mat::hash {
         }
 
         void update() override {
-            auto key = io.in & HashUnitConfig<mau_id>::get().masks[unit_id];
+            auto key = io.in.get() & HashUnitConfig<mau_id>::get().masks[unit_id];
             for (size_t i = 0; i < value_width; i++) {
-                io.out.get().set(i, key ^ HashUnitConfig<mau_id>::get().matrices[unit_id][i]);
+                int popcount = ((key ^ HashUnitConfig<mau_id>::get().matrices[unit_id][i])).xorR() % 2;
+                io.out.get().set(i, popcount);
             }
             io.out.get() ^= HashUnitConfig<mau_id>::get().salts[unit_id];
         }

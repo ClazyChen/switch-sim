@@ -14,7 +14,6 @@ namespace fpga::utils {
         static constexpr auto from(const char* const* str) {
             constexpr size_t n = w / 4; // 一个十六进制字符占 4 位
             UInt<w> result{};
-            std::cout << *str << " " << w << std::endl;
             for (size_t i = 0; i < UInt<w>::n; i++) {
                 std::string str_ = std::string(*str);
                 std::string hex_string = str_.substr(16 * i, 16);

@@ -315,6 +315,19 @@ namespace fpga::utils {
             
         }
 
+        constexpr int xorR() {
+            int result = 0;
+            for (int i = 0; i < n; i++) {
+                uint64_t temp = data[i];
+                for (int j = 0; j < 64; j++) {
+                    result += temp % 2;
+                    temp /= 2;
+
+                }
+            }
+            return result;
+        }
+
         // 取 slice，编译期
         template <size_t hi, size_t lo>
             requires (hi >= lo) && (hi < w)
