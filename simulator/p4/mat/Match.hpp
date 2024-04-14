@@ -75,10 +75,12 @@ namespace fpga::p4::mat {
                 io.match_read[i].en.in = memread.io.match_read[i].en;
                 io.match_read[i].sram_id.in = memread.io.match_read[i].sram_id;
                 io.match_read[i].addr.in = memread.io.match_read[i].addr;
+                
 
                 io.match_read[i].en.pass();
                 io.match_read[i].sram_id.pass();
                 io.match_read[i].addr.pass();
+                
             }
 
             compare.io.key_in = memread.io.key.out;
@@ -100,6 +102,11 @@ namespace fpga::p4::mat {
 
             // 传递组合逻辑的输出
            // std::copy(memread.io.match_read.begin(), memread.io.match_read.end(), io.match_read.begin());
+
+            for (int i = 0; i < read_count; i++) {
+                io.match_read[i].data.pass();
+                memread.io.match_read[i].data = io.match_read[i].data.out; 
+            }
         }
 
         void run() override {

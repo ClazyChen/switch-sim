@@ -46,6 +46,10 @@ namespace fpga::p4 {
 
             sram.update();
 
+            for (int i = 0; i < read_count; i++) {
+                match.io.match_read[i].data.in = sram.io.match_read[i].data;
+            }
+
             // 将流水线中的访存请求发送给存储器
            // std::copy(match.io.match_read.begin(), match.io.match_read.end(), sram.io.match_read.begin());
         }
