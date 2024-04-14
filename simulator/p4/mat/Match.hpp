@@ -70,6 +70,12 @@ namespace fpga::p4::mat {
             memread.io.gateway_in = getaddress.io.gateway.out;
             std::copy(getaddress.io.sram_id_out.begin(), getaddress.io.sram_id_out.end(), memread.io.sram_id_in.begin());
             std::copy(getaddress.io.on_chip_addr_out.begin(), getaddress.io.on_chip_addr_out.end(), memread.io.on_chip_addr_in.begin());
+            for (int i = 0; i < read_count; i++) {
+                io.match_read[i].en.get() = memread.io.match_read[i].en.get();
+                io.match_read[i].sram_id.get() = memread.io.match_read[i].sram_id.get();
+                io.match_read[i].addr.get() = memread.io.match_read[i].addr.get();
+                memread.io.match_read[i].data.get() = io.match_read[i].data.get();
+            }
 
             compare.io.key_in = memread.io.key.out;
             std::copy(memread.io.read_en_out.begin(), memread.io.read_en_out.end(), compare.io.read_en_in.begin());
