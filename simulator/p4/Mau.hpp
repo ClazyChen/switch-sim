@@ -8,9 +8,6 @@ namespace fpga::p4 {
     // 用于实现一个完整的 MAU
     template <size_t mau_id>
     struct Mau : public Module {
-    private:
-        static constexpr size_t read_count = fpga::Config::mat::getaddress::read_count;
-    public:
         struct IO {
             Pipe pipe;
         } io;
@@ -35,15 +32,7 @@ namespace fpga::p4 {
             match.update();
 
             // 将流水线中的访存请求发送给存储器
-            //std::copy(match.io.match_read.begin(), match.io.match_read.end(), sram.io.match_read.begin());
-            for (int i = 0; i < read_count; i++) {
-                sram.io.match_read[i].en.get() = match.io.match_read[i].en.get();
-                sram.io.match_read[i].sram_id.get() = match.io.match_read[i].sram_id.get();
-                sram.io.match_read[i].addr.get() = match.io.match_read[i].addr.get();
-                match.io.match_read[i].data.get() = sram.io.match_read[i].data.get();
-
-            }
-            sram.update();
+            std::copy(match.io.match_read.begin(), match.io.match_read.end(), sram.io.match_read.begin());
         }
 
         void run() override {

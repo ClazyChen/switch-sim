@@ -52,9 +52,6 @@ namespace fpga::p4::mat::getaddress {
                     if (index == 0) {
                         return 0;
                     }
-                    else {
-                        return 1;
-                    }
                 }
             }
         }
