@@ -36,13 +36,13 @@ namespace fpga::p4 {
 
             // 将流水线中的访存请求发送给存储器
             //std::copy(match.io.match_read.begin(), match.io.match_read.end(), sram.io.match_read.begin());
-            /*for (int i = 0; i < read_count; i++) {
-                sram.io.match_read[i].en = match.io.match_read[i].en;
-                sram.io.match_read[i].sram_id = match.io.match_read[i].sram_id;
-                sram.io.match_read[i].addr = match.io.match_read[i].addr;
-                match.io.match_read[i].data = sram.io.match_read[i].data;
+            for (int i = 0; i < read_count; i++) {
+                sram.io.match_read[i].en.get() = match.io.match_read[i].en.get();
+                sram.io.match_read[i].sram_id.get() = match.io.match_read[i].sram_id.get();
+                sram.io.match_read[i].addr.get() = match.io.match_read[i].addr.get();
+                match.io.match_read[i].data.get() = sram.io.match_read[i].data.get();
 
-            }*/
+            }
             sram.update();
         }
 
