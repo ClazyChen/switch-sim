@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../../utils.hpp"
+#include <iostream>
 
 namespace fpga::p4::mat::compare {
 
@@ -9,8 +10,8 @@ namespace fpga::p4::mat::compare {
     struct CompareConfig {
 
         static constexpr size_t key_part_count = fpga::Config::mat::compare::key_part_start.size();
-        static constexpr size_t mask_unit_count = fpga::Config::mat::compare::mask_width;
-        static constexpr size_t mask_unit_width = fpga::Config::mat::compare::mask_unit;
+        static constexpr size_t mask_unit_count = fpga::Config::mat::compare::mask_unit;
+        static constexpr size_t mask_unit_width = fpga::Config::mat::compare::mask_width;
         static constexpr size_t key_part_index_width = fpga::utils::Log2Ceil<key_part_count>::value;
 
         static constexpr auto key_part_index(size_t index) {
@@ -25,6 +26,7 @@ namespace fpga::p4::mat::compare {
             for (size_t i = 0; i < mask_unit_count; i++) {
                 if (mask_units & 1) {
                     mask |= (mask1 << (i * mask_unit_width));
+                    
                 }
                 mask_units >>= 1;
             }

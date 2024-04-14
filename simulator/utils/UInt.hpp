@@ -164,7 +164,8 @@ namespace fpga::utils {
             for (size_t i = 0; i < n; i++) {
                 if (i + shift + 1 < n) {
                     result.data[i + shift] |= (data[i] >> (64 - offset));
-                }else if (i + shift < n) {
+                }
+                if (i + shift < n) {
                     result.data[i + shift] |= (data[i] << offset);
                 }
             }
