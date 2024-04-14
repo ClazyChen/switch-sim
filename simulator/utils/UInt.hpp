@@ -178,7 +178,7 @@ namespace fpga::utils {
             size_t offset = u % 64;
             for (size_t i = 0; i < n; i++) {
                 if (i >= shift + 1) {
-                    result.data[i - shift - 1] |= (data[i] << (64 - offset));
+                    result.data[i - shift] |= (data[i] << (64 - offset));
                 }
                 if (i >= shift) {
                     result.data[i - shift] |= (data[i] >> offset);
