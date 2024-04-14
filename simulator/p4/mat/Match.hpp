@@ -7,6 +7,7 @@
 #include "memread/MemRead.hpp"
 #include "compare/Compare.hpp"
 #include "transform/Transform.hpp"
+#include "../mem/FlippedSramClusterReadWrite.hpp"
 
 namespace fpga::p4::mat {
 
@@ -22,7 +23,7 @@ namespace fpga::p4::mat {
         struct IO {
             Pipe pipe;
             std::array<Out<UInt<value_width>>, value_count> value_out;
-            std::array<fpga::p4::mem::SramClusterRead, read_count> match_read;
+            std::array<fpga::p4::mem::FlippedSramClusterRead, read_count> match_read;
         } io;
 
         // 每一级流水线
@@ -70,12 +71,12 @@ namespace fpga::p4::mat {
             memread.io.gateway_in = getaddress.io.gateway.out;
             std::copy(getaddress.io.sram_id_out.begin(), getaddress.io.sram_id_out.end(), memread.io.sram_id_in.begin());
             std::copy(getaddress.io.on_chip_addr_out.begin(), getaddress.io.on_chip_addr_out.end(), memread.io.on_chip_addr_in.begin());
-            for (int i = 0; i < read_count; i++) {
-                io.match_read[i].en.get() = memread.io.match_read[i].en.get();
-                io.match_read[i].sram_id.get() = memread.io.match_read[i].sram_id.get();
-                io.match_read[i].addr.get() = memread.io.match_read[i].addr.get();
-                memread.io.match_read[i].data.get() = io.match_read[i].data.get();
-            }
+            /*for (int i = 0; i < read_count; i++) {
+                io.match_read[i].en = memread.io.match_read[i].en;
+                io.match_read[i].sram_id = memread.io.match_read[i].sram_id;
+                io.match_read[i].addr = memread.io.match_read[i].addr;
+                memread.io.match_read[i].data = io.match_read[i].data;
+            }*/
 
             compare.io.key_in = memread.io.key.out;
             std::copy(memread.io.read_en_out.begin(), memread.io.read_en_out.end(), compare.io.read_en_in.begin());
