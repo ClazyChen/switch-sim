@@ -3,6 +3,8 @@
 #include "MemReadConfig.hpp"
 #include "../../mem/SramCluster.hpp"
 #include "../../Pipe.hpp"
+#include "../../mem/FlippedSramClusterReadWrite.hpp"
+#include <iostream>
 
 namespace fpga::p4::mat::memread {
 
@@ -27,7 +29,7 @@ namespace fpga::p4::mat::memread {
             std::array<In<UInt<on_chip_addr_width>>, read_count> on_chip_addr_in;
             std::array<Out<bool>, read_count> read_en_out;
             std::array<Out<UInt<sram_data_width>>, read_count> read_out;
-            std::array<fpga::p4::mem::SramClusterRead, read_count> match_read;
+            std::array<fpga::p4::mem::FlippedSramClusterRead, read_count> match_read;
         } io;
 
     private:
@@ -72,7 +74,9 @@ namespace fpga::p4::mat::memread {
                     io.match_read[i].en = read_en[i];
                     io.match_read[i].sram_id = io.sram_id_in[i];
                     io.match_read[i].addr = io.on_chip_addr_in[i];
+                    //std::cout << io.match_read[i].en << " ";
                 }
+                //std::cout << std::endl;
             }
             else {
                 // 在没有数据包的情况下也不需要读取
